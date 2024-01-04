@@ -1,0 +1,36 @@
+# IDE - VSCODE
+**/.vscode/*
+!**/.vscode/settings.json
+!**/.vscode/tasks.json
+!**/.vscode/launch.json
+!**/.vscode/extensions.json
+!**/.vscode/*.code-snippets
+
+## Local History for Visual Studio Code
+.history/
+
+## Built Visual Studio Code Extensions
+*.vsix
+
+# IDE - JetBrains
+**/.idea/*
+
+# IDE - others
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+
+# System Files
+.DS_Store
+Desktop.ini
+Thumbs.db
+.Spotlight-V100
+.Trashes
+
+# Miscellaneous
+.env
+*.local
+*.local.*
