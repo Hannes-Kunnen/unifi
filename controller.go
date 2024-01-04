@@ -1,24 +1,128 @@
 package unifi
 
 import (
+	"crypto/tls"
+	"errors"
 	"net/http"
+	"net/url"
 	"time"
 )
 
-// A Controller is used to manage login state and to send requests linked to a UniFi controller
+// A Controller is used to manage login state and to send requests linked to a UniFi Controller
 type Controller struct {
-	// The base URL at which the UniFi controller is reachable
-	BaseUrl string
-	// The cookie received from the UniFi controller after login
+	// The base URL at which the UniFi Controller is reachable
+	baseUrl string
+	// The http client used to make the requests
+	httpClient *http.Client
+	// The type of Controller (some controllers use different endpoints e.g. UDM-Pro)
+	controllerType string
+	// The cookie received from the UniFi Controller after login
 	cookie *http.Cookie
-	// The CSRF token received from the UniFi controller after login
+	// The CSRF token received from the UniFi Controller after login
 	csrfToken string
+	// Contains the users login info
+	loginInfo LoginInfo
+	// Indicates if auto re-authentication should occur when the cookie expires
+	remainAuthenticated bool
+	// The timeout to use when making http requests
+	requestTimeout time.Duration
 	// Indicates whether TLS verification should be skipped during requests
-	SkipTLSVerification bool
-	// The type of controller (some controllers use different endpoints e.g. UDM-Pro)
-	Type string
-	// The timeout to use when making http requests (if not set no timeout will be used)
-	RequestTimeout time.Duration
+	skipTLSVerification bool
+}
+
+type ControllerBuilder interface {
+	SetBaseUrl(baseUrl string) ControllerBuilder
+	SetControllerType(controllerType string) ControllerBuilder
+	SetRequestTimout(timeout time.Duration) ControllerBuilder
+	SetTlsVerification(verify bool) ControllerBuilder
+	Build() (*Controller, error)
+}
+
+func NewControllerBuilder() ControllerBuilder {
+	return &controllerBuilder{
+		controller: &Controller{},
+	}
+}
+
+type controllerBuilder struct {
+	controller *Controller
+}
+
+func (builder *controllerBuilder) SetBaseUrl(baseUrl string) ControllerBuilder {
+	builder.controller.baseUrl = baseUrl
+	return builder
+}
+
+func (builder *controllerBuilder) SetControllerType(controllerType string) ControllerBuilder {
+	builder.controller.controllerType = controllerType
+	return builder
+}
+
+func (builder *controllerBuilder) SetRequestTimout(timeout time.Duration) ControllerBuilder {
+	builder.controller.requestTimeout = timeout
+	return builder
+}
+
+func (builder *controllerBuilder) SetTlsVerification(verify bool) ControllerBuilder {
+	builder.controller.skipTLSVerification = !verify
+	return builder
+}
+
+func (builder *controllerBuilder) Build() (*Controller, error) {
+	// Verify base url is set and a valid URL
+	if len(builder.controller.baseUrl) == 0 {
+		return nil, errors.New("base url not set, can not build controller")
+	} else {
+		_, err := url.ParseRequestURI(builder.controller.baseUrl)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	// Verify request timeout is valid
+	if builder.controller.requestTimeout < 0 {
+		return nil, errors.New("request timout can not be smaller than 0 (no timeout)")
+	}
+
+	// Create HTTP client
+	transport := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: builder.controller.skipTLSVerification},
+	}
+	builder.controller.httpClient = &http.Client{
+		Timeout:   builder.controller.requestTimeout,
+		Transport: transport,
+	}
+
+	return builder.controller, nil
+}
+
+func (controller *Controller) SetBaseUrl(baseUrl string) error {
+	_, err := url.ParseRequestURI(baseUrl)
+	if err != nil {
+		return err
+	}
+	controller.baseUrl = baseUrl
+	return nil
+}
+
+func (controller *Controller) SetControllerType(controllerType string) {
+	controller.controllerType = controllerType
+}
+
+func (controller *Controller) SetRequestTimout(timeout time.Duration) error {
+	if timeout < 0 {
+		return errors.New("timeout can not be smaller than 0")
+	}
+	controller.requestTimeout = timeout
+	controller.httpClient.Timeout = controller.requestTimeout
+	return nil
+}
+
+func (controller *Controller) SetTlsVerification(verify bool) {
+	controller.skipTLSVerification = !verify
+	controller.httpClient.Transport = &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: controller.skipTLSVerification},
+	}
 }
 
 // Meta is included in most responses and seems to contain extra information about the request
@@ -31,16 +135,10 @@ type Meta struct {
 	Msg string `json:"msg,omitempty"`
 }
 
-// CreateDefaultSite creates and returns the default Site linked to this controller
+// CreateDefaultSite creates and returns the default Site linked to this Controller
 func (controller *Controller) CreateDefaultSite() Site {
 	return Site{
 		Name:       "default",
 		Controller: controller,
 	}
-}
-
-// AuthorizeRequest adds the authorization cookie and CSRF token to the given http request
-func (controller *Controller) AuthorizeRequest(req *http.Request) {
-	req.AddCookie(controller.cookie)
-	req.Header.Set("X-CSRF-Token", controller.csrfToken)
 }

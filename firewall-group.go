@@ -2,7 +2,6 @@ package unifi
 
 import (
 	"bytes"
-	"crypto/tls"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -16,26 +15,25 @@ type FirewallGroupResponse struct {
 }
 
 type FirewallGroup struct {
-	GroupMembers []string `json:"group_members"`        // The group data (e.g. IPv6 addresses)
-	Name         string   `json:"name,omitempty"`       // The group name
-	SiteId       string   `json:"site_id,omitempty"`    // The id of the site linked to this group
-	Id           string   `json:"_id,omitempty"`        // The group ID
-	GroupType    string   `json:"group_type,omitempty"` // The type of group
+	// The group data (e.g. IPv6 addresses)
+	GroupMembers []string `json:"group_members,omitempty"`
+	// The group name
+	Name string `json:"name,omitempty"`
+	// The id of the site linked to this group
+	SiteId string `json:"site_id,omitempty"`
+	// The group ID
+	Id string `json:"_id,omitempty"`
+	// The type of group
+	GroupType string `json:"group_type,omitempty"`
 }
 
 // CreateFirewallGroup creates a new firewall group linked to this site
 func (site *Site) CreateFirewallGroup(
 	newGroupData FirewallGroup, // The data of the new group
 ) (responseData FirewallGroupResponse, err error) {
-	endpointUrl := site.createEndpointUrl("rest/firewallgroup", "")
-
-	transport := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: site.Controller.SkipTLSVerification},
-	}
-
-	client := &http.Client{
-		Timeout:   site.Controller.RequestTimeout,
-		Transport: transport,
+	err = site.Controller.verifyAuthentication()
+	if err != nil {
+		return
 	}
 
 	byteArray, err := json.Marshal(newGroupData)
@@ -43,18 +41,16 @@ func (site *Site) CreateFirewallGroup(
 		return
 	}
 
+	endpointUrl := site.createEndpointUrl("rest/firewallgroup", "")
 	payload := bytes.NewBuffer(byteArray)
-
 	req, err := http.NewRequest(`POST`, endpointUrl, payload)
 	if err != nil {
 		return
 	}
 
-	// Add authentication
-	req.AddCookie(site.Controller.cookie)
-	req.Header.Set("X-CSRF-Token", site.Controller.csrfToken)
+	site.Controller.AuthorizeRequest(req)
 
-	res, err := client.Do(req)
+	res, err := site.Controller.httpClient.Do(req)
 	if err != nil {
 		return
 	}
@@ -85,27 +81,20 @@ func (site *Site) CreateFirewallGroup(
 
 // GetAllFirewallGroups returns all firewall groups linked to this site
 func (site *Site) GetAllFirewallGroups() (responseData FirewallGroupResponse, err error) {
+	err = site.Controller.verifyAuthentication()
+	if err != nil {
+		return
+	}
+
 	endpointUrl := site.createEndpointUrl("rest/firewallgroup", "")
-
-	transport := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: site.Controller.SkipTLSVerification},
-	}
-
-	client := &http.Client{
-		Timeout:   site.Controller.RequestTimeout,
-		Transport: transport,
-	}
-
 	req, err := http.NewRequest(`GET`, endpointUrl, nil)
 	if err != nil {
 		return
 	}
 
-	// Add authentication
-	req.AddCookie(site.Controller.cookie)
-	req.Header.Set("X-CSRF-Token", site.Controller.csrfToken)
+	site.Controller.AuthorizeRequest(req)
 
-	res, err := client.Do(req)
+	res, err := site.Controller.httpClient.Do(req)
 	if err != nil {
 		return
 	}
@@ -136,27 +125,20 @@ func (site *Site) GetAllFirewallGroups() (responseData FirewallGroupResponse, er
 
 // GetFirewallGroup returns the firewall group linked to the given ID from this site
 func (site *Site) GetFirewallGroup(id string) (responseData FirewallGroupResponse, err error) {
+	err = site.Controller.verifyAuthentication()
+	if err != nil {
+		return
+	}
+
 	endpointUrl := site.createEndpointUrl("rest/firewallgroup", id)
-
-	transport := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: site.Controller.SkipTLSVerification},
-	}
-
-	client := &http.Client{
-		Timeout:   site.Controller.RequestTimeout,
-		Transport: transport,
-	}
-
 	req, err := http.NewRequest(`GET`, endpointUrl, nil)
 	if err != nil {
 		return
 	}
 
-	// Add authentication
-	req.AddCookie(site.Controller.cookie)
-	req.Header.Set("X-CSRF-Token", site.Controller.csrfToken)
+	site.Controller.AuthorizeRequest(req)
 
-	res, err := client.Do(req)
+	res, err := site.Controller.httpClient.Do(req)
 	if err != nil {
 		return
 	}
@@ -190,15 +172,9 @@ func (site *Site) UpdateFirewallGroup(
 	id string, // The firewall group id
 	newGroupData FirewallGroup, // The updated group data
 ) (responseData FirewallGroupResponse, err error) {
-	endpointUrl := site.createEndpointUrl("rest/firewallgroup", id)
-
-	transport := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: site.Controller.SkipTLSVerification},
-	}
-
-	client := &http.Client{
-		Timeout:   site.Controller.RequestTimeout,
-		Transport: transport,
+	err = site.Controller.verifyAuthentication()
+	if err != nil {
+		return
 	}
 
 	byteArray, err := json.Marshal(newGroupData)
@@ -206,21 +182,19 @@ func (site *Site) UpdateFirewallGroup(
 		return
 	}
 
+	endpointUrl := site.createEndpointUrl("rest/firewallgroup", id)
 	payload := bytes.NewBuffer(byteArray)
-
 	req, err := http.NewRequest(`PUT`, endpointUrl, payload)
 	if err != nil {
 		return
 	}
 
-	// Add authentication
-	req.AddCookie(site.Controller.cookie)
-	req.Header.Set("X-CSRF-Token", site.Controller.csrfToken)
+	site.Controller.AuthorizeRequest(req)
 
 	// Set content type
 	req.Header.Set("Content-Type", "application/json")
 
-	res, err := client.Do(req)
+	res, err := site.Controller.httpClient.Do(req)
 	if err != nil {
 		return
 	}
@@ -251,27 +225,20 @@ func (site *Site) UpdateFirewallGroup(
 
 // DeleteFirewallGroup deletes the firewall group linked to the given ID from this site
 func (site *Site) DeleteFirewallGroup(id string) (responseData FirewallGroupResponse, err error) {
+	err = site.Controller.verifyAuthentication()
+	if err != nil {
+		return
+	}
+
 	endpointUrl := site.createEndpointUrl("rest/firewallgroup", id)
-
-	transport := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: site.Controller.SkipTLSVerification},
-	}
-
-	client := &http.Client{
-		Timeout:   site.Controller.RequestTimeout,
-		Transport: transport,
-	}
-
 	req, err := http.NewRequest(`DELETE`, endpointUrl, nil)
 	if err != nil {
 		return
 	}
 
-	// Add authentication
-	req.AddCookie(site.Controller.cookie)
-	req.Header.Set("X-CSRF-Token", site.Controller.csrfToken)
+	site.Controller.AuthorizeRequest(req)
 
-	res, err := client.Do(req)
+	res, err := site.Controller.httpClient.Do(req)
 	if err != nil {
 		return
 	}
