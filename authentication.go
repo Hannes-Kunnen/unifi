@@ -13,20 +13,8 @@ var UnauthenticatedError = errors.New("cookie or CSRF token not set, login befor
 var SessionExpiredError = errors.New("cookie expired, re-login before continuing")
 
 type loginInfo struct {
-	Username   string `json:"username,omitempty"`
-	Password   string `json:"password,omitempty"`
-	RememberMe bool   `json:"rememberMe,omitempty"`
-}
-
-// LoginOptions contains optional login arguments and can be left empty
-type LoginOptions struct {
-	// Indicates if a long-lasting session is requested
-	// (normal session length is 2hr, long-lasting is 30 days) ToDo: Include this info?
-	RememberMe bool
-	// If RemainAuthenticated is set to true automatic re-authentication with given credentials
-	// will be attempted when the session expires
-	// (use of long-lasting sessions is recommended to reduce authentication overhead)
-	RemainAuthenticated bool
+	Username string `json:"username,omitempty"`
+	Password string `json:"password,omitempty"`
 }
 
 // The Login method authenticates the user at the UniFi controller and saves the received cookie
@@ -34,7 +22,6 @@ type LoginOptions struct {
 func (controller *Controller) Login(
 	username string,
 	password string,
-	options LoginOptions,
 ) error {
 	var endpointUrl string
 
@@ -46,9 +33,8 @@ func (controller *Controller) Login(
 	}
 
 	controller.loginInfo = loginInfo{
-		Username:   username,
-		Password:   password,
-		RememberMe: options.RememberMe,
+		Username: username,
+		Password: password,
 	}
 
 	byteArray, err := json.Marshal(controller.loginInfo)
@@ -90,59 +76,46 @@ func (controller *Controller) Login(
 		return errors.New("failed to extract CSRF token from response header")
 	}
 
-	// Set remained authenticated option (don't set until authentication was successful)
-	controller.remainAuthenticated = options.RemainAuthenticated
-
-	fmt.Printf("Token: %+v\n", controller.cookie)
-	fmt.Printf("csrf: %s\n", controller.csrfToken)
-
 	return nil
 }
 
-// The Logout invalidates the current session credentials (cookie and CSRF token) and sets the
-// remain authenticated option to false
+// The Logout invalidates the current session credentials (cookie and CSRF token) and clears the
+// credentials
 func (controller *Controller) Logout() error {
 	err := controller.AssertAuthenticated()
-	if err != nil {
-		// Resetting cookie and CSRF token as they are not valid
-		controller.cookie = nil
-		controller.csrfToken = ""
 
-		controller.remainAuthenticated = false
+	// Only perform logout request when logged in
+	if err == nil {
+		var endpointUrl string
+		switch controller.controllerType {
+		case "UDM-Pro":
+			endpointUrl = fmt.Sprintf("%s/api/auth/logout", controller.baseUrl)
+		default:
+			endpointUrl = fmt.Sprintf("%s/api/logout", controller.baseUrl)
+		}
 
-		// No need to attempt logout when not authenticated
-		return nil
+		req, err := http.NewRequest(`POST`, endpointUrl, nil)
+		if err != nil {
+			return err
+		}
+
+		controller.AuthorizeRequest(req)
+
+		res, err := controller.httpClient.Do(req)
+		if err != nil {
+			return err
+		}
+
+		if res.StatusCode != 200 {
+			return errors.New(fmt.Sprintf("logout failed with response code %d\n", res.StatusCode))
+		}
 	}
 
-	var endpointUrl string
-	switch controller.controllerType {
-	case "UDM-Pro":
-		endpointUrl = fmt.Sprintf("%s/api/auth/logout", controller.baseUrl)
-	default:
-		endpointUrl = fmt.Sprintf("%s/api/logout", controller.baseUrl)
-	}
-
-	req, err := http.NewRequest(`POST`, endpointUrl, nil)
-	if err != nil {
-		return err
-	}
-
-	controller.AuthorizeRequest(req)
-
-	res, err := controller.httpClient.Do(req)
-	if err != nil {
-		return err
-	}
-
-	if res.StatusCode != 200 {
-		return errors.New(fmt.Sprintf("logout failed with response code %d\n", res.StatusCode))
-	}
-
-	// Resetting cookie and CSRF token as they are no longer valid
+	// Clear cookie, CSRF token and credentials
 	controller.cookie = nil
 	controller.csrfToken = ""
-
-	controller.remainAuthenticated = false
+	controller.loginInfo.Username = ""
+	controller.loginInfo.Password = ""
 
 	return nil
 }
@@ -166,19 +139,14 @@ func (controller *Controller) AssertAuthenticated() error {
 }
 
 // Verifies the controller has valid authentication.
-// If the session has expired and remain authenticated was enabled re-authentication will be
-// attempted
+// If the session has expired re-authentication will be attempted
 func (controller *Controller) verifyAuthentication() error {
 	err := controller.AssertAuthenticated()
 
-	if controller.remainAuthenticated && errors.Is(err, SessionExpiredError) {
+	if errors.Is(err, SessionExpiredError) {
 		err = controller.Login(
 			controller.loginInfo.Username,
 			controller.loginInfo.Password,
-			LoginOptions{
-				RememberMe:          controller.loginInfo.RememberMe,
-				RemainAuthenticated: true,
-			},
 		)
 		if err != nil {
 			return err

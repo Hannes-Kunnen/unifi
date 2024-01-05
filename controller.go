@@ -23,8 +23,6 @@ type Controller struct {
 	csrfToken string
 	// Contains the users login info
 	loginInfo loginInfo
-	// Indicates if auto re-authentication should occur when the cookie expires
-	remainAuthenticated bool
 	// The timeout to use when making http requests
 	requestTimeout time.Duration
 	// Indicates whether TLS verification should be skipped during requests
