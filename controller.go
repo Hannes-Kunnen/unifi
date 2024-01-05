@@ -3,6 +3,7 @@ package unifi
 import (
 	"crypto/tls"
 	"errors"
+	"fmt"
 	"net/http"
 	"net/url"
 	"time"
@@ -69,14 +70,15 @@ func (builder *controllerBuilder) SetTlsVerification(verify bool) ControllerBuil
 }
 
 func (builder *controllerBuilder) Build() (*Controller, error) {
-	// Verify base url is set and a valid URL
-	if len(builder.controller.baseUrl) == 0 {
-		return nil, errors.New("base url not set, can not build controller")
-	} else {
-		_, err := url.ParseRequestURI(builder.controller.baseUrl)
-		if err != nil {
-			return nil, err
+	_, err := url.ParseRequestURI(builder.controller.baseUrl)
+	if err != nil {
+		var urlError *url.Error
+		if errors.As(err, &urlError) {
+			return nil, errors.New(
+				fmt.Sprintf("failed to %s url %q: %s", urlError.Op, urlError.URL, urlError.Err),
+			)
 		}
+		return nil, err
 	}
 
 	// Verify request timeout is valid
@@ -99,6 +101,12 @@ func (builder *controllerBuilder) Build() (*Controller, error) {
 func (controller *Controller) SetBaseUrl(baseUrl string) error {
 	_, err := url.ParseRequestURI(baseUrl)
 	if err != nil {
+		var urlError *url.Error
+		if errors.As(err, &urlError) {
+			return errors.New(
+				fmt.Sprintf("failed to %s url %q: %s", urlError.Op, urlError.URL, urlError.Err),
+			)
+		}
 		return err
 	}
 	controller.baseUrl = baseUrl
