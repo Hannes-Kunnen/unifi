@@ -12,7 +12,7 @@ import (
 var UnauthenticatedError = errors.New("cookie or CSRF token not set, login before continuing")
 var SessionExpiredError = errors.New("cookie expired, re-login before continuing")
 
-type LoginInfo struct {
+type loginInfo struct {
 	Username   string `json:"username,omitempty"`
 	Password   string `json:"password,omitempty"`
 	RememberMe bool   `json:"rememberMe,omitempty"`
@@ -45,7 +45,7 @@ func (controller *Controller) Login(
 		endpointUrl = fmt.Sprintf("%s/api/login", controller.baseUrl)
 	}
 
-	controller.loginInfo = LoginInfo{
+	controller.loginInfo = loginInfo{
 		Username:   username,
 		Password:   password,
 		RememberMe: options.RememberMe,

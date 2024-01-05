@@ -21,7 +21,7 @@ type Controller struct {
 	// The CSRF token received from the UniFi Controller after login
 	csrfToken string
 	// Contains the users login info
-	loginInfo LoginInfo
+	loginInfo loginInfo
 	// Indicates if auto re-authentication should occur when the cookie expires
 	remainAuthenticated bool
 	// The timeout to use when making http requests
