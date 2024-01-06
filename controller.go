@@ -37,14 +37,14 @@ type ControllerBuilder interface {
 	Build() (*Controller, error)
 }
 
+type controllerBuilder struct {
+	controller *Controller
+}
+
 func NewControllerBuilder() ControllerBuilder {
 	return &controllerBuilder{
 		controller: &Controller{},
 	}
-}
-
-type controllerBuilder struct {
-	controller *Controller
 }
 
 func (builder *controllerBuilder) SetBaseUrl(baseUrl string) ControllerBuilder {
@@ -144,7 +144,7 @@ type Meta struct {
 // CreateDefaultSite creates and returns the default Site linked to this Controller
 func (controller *Controller) CreateDefaultSite() Site {
 	return Site{
-		Name:       "default",
-		Controller: controller,
+		name:       "default",
+		controller: controller,
 	}
 }

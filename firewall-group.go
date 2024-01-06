@@ -31,7 +31,7 @@ type FirewallGroup struct {
 func (site *Site) CreateFirewallGroup(
 	newGroupData FirewallGroup, // The data of the new group
 ) (responseData FirewallGroupResponse, err error) {
-	err = site.Controller.verifyAuthentication()
+	err = site.controller.verifyAuthentication()
 	if err != nil {
 		return
 	}
@@ -48,9 +48,9 @@ func (site *Site) CreateFirewallGroup(
 		return
 	}
 
-	site.Controller.AuthorizeRequest(req)
+	site.controller.AuthorizeRequest(req)
 
-	res, err := site.Controller.httpClient.Do(req)
+	res, err := site.controller.httpClient.Do(req)
 	if err != nil {
 		return
 	}
@@ -81,7 +81,7 @@ func (site *Site) CreateFirewallGroup(
 
 // GetAllFirewallGroups returns all firewall groups linked to this site
 func (site *Site) GetAllFirewallGroups() (responseData FirewallGroupResponse, err error) {
-	err = site.Controller.verifyAuthentication()
+	err = site.controller.verifyAuthentication()
 	if err != nil {
 		return
 	}
@@ -92,9 +92,9 @@ func (site *Site) GetAllFirewallGroups() (responseData FirewallGroupResponse, er
 		return
 	}
 
-	site.Controller.AuthorizeRequest(req)
+	site.controller.AuthorizeRequest(req)
 
-	res, err := site.Controller.httpClient.Do(req)
+	res, err := site.controller.httpClient.Do(req)
 	if err != nil {
 		return
 	}
@@ -125,7 +125,7 @@ func (site *Site) GetAllFirewallGroups() (responseData FirewallGroupResponse, er
 
 // GetFirewallGroup returns the firewall group linked to the given ID from this site
 func (site *Site) GetFirewallGroup(id string) (responseData FirewallGroupResponse, err error) {
-	err = site.Controller.verifyAuthentication()
+	err = site.controller.verifyAuthentication()
 	if err != nil {
 		return
 	}
@@ -136,9 +136,9 @@ func (site *Site) GetFirewallGroup(id string) (responseData FirewallGroupRespons
 		return
 	}
 
-	site.Controller.AuthorizeRequest(req)
+	site.controller.AuthorizeRequest(req)
 
-	res, err := site.Controller.httpClient.Do(req)
+	res, err := site.controller.httpClient.Do(req)
 	if err != nil {
 		return
 	}
@@ -172,7 +172,7 @@ func (site *Site) UpdateFirewallGroup(
 	id string, // The firewall group id
 	newGroupData FirewallGroup, // The updated group data
 ) (responseData FirewallGroupResponse, err error) {
-	err = site.Controller.verifyAuthentication()
+	err = site.controller.verifyAuthentication()
 	if err != nil {
 		return
 	}
@@ -189,12 +189,12 @@ func (site *Site) UpdateFirewallGroup(
 		return
 	}
 
-	site.Controller.AuthorizeRequest(req)
+	site.controller.AuthorizeRequest(req)
 
 	// Set content type
 	req.Header.Set("Content-Type", "application/json")
 
-	res, err := site.Controller.httpClient.Do(req)
+	res, err := site.controller.httpClient.Do(req)
 	if err != nil {
 		return
 	}
@@ -225,7 +225,7 @@ func (site *Site) UpdateFirewallGroup(
 
 // DeleteFirewallGroup deletes the firewall group linked to the given ID from this site
 func (site *Site) DeleteFirewallGroup(id string) (responseData FirewallGroupResponse, err error) {
-	err = site.Controller.verifyAuthentication()
+	err = site.controller.verifyAuthentication()
 	if err != nil {
 		return
 	}
@@ -236,9 +236,9 @@ func (site *Site) DeleteFirewallGroup(id string) (responseData FirewallGroupResp
 		return
 	}
 
-	site.Controller.AuthorizeRequest(req)
+	site.controller.AuthorizeRequest(req)
 
-	res, err := site.Controller.httpClient.Do(req)
+	res, err := site.controller.httpClient.Do(req)
 	if err != nil {
 		return
 	}

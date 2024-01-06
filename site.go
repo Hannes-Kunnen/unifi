@@ -1,24 +1,64 @@
 package unifi
 
-import "fmt"
+import (
+	"errors"
+	"fmt"
+)
 
 // A Site is used to access site specific requests of a UniFi Controller
 type Site struct {
-	// Site name (as defined in the UniFi Controller)
-	Name string
-	// Reference to the Controller managing the site
-	Controller *Controller
+	// Reference to the controller managing the site
+	controller *Controller
+	// Site name (as defined in the UniFi controller)
+	name string
+}
+
+type SiteBuilder interface {
+	SetController(controller *Controller) SiteBuilder
+	SetName(name string) SiteBuilder
+	Build() (*Site, error)
+}
+
+type siteBuilder struct {
+	site *Site
+}
+
+func NewSiteBuilder() SiteBuilder {
+	return &siteBuilder{
+		site: &Site{},
+	}
+}
+
+func (builder *siteBuilder) SetController(controller *Controller) SiteBuilder {
+	builder.site.controller = controller
+	return builder
+}
+
+func (builder *siteBuilder) SetName(name string) SiteBuilder {
+	builder.site.name = name
+	return builder
+}
+
+func (builder *siteBuilder) Build() (*Site, error) {
+	if builder.site.controller == nil {
+		return nil, errors.New("site controller is required")
+	}
+
+	if len(builder.site.name) == 0 {
+		return nil, errors.New("site name is required")
+	}
+	return builder.site, nil
 }
 
 // Returns the endpoint for the given path and ID (if not empty) based on the site and Controller
 // type
 func (site *Site) createEndpointUrl(path string, id string) string {
 	var endpoint string
-	switch site.Controller.controllerType {
+	switch site.controller.controllerType {
 	case "UDM-Pro":
-		endpoint = fmt.Sprintf("%s/proxy/network/api/s/%s", site.Controller.baseUrl, site.Name)
+		endpoint = fmt.Sprintf("%s/proxy/network/api/s/%s", site.controller.baseUrl, site.name)
 	default:
-		endpoint = fmt.Sprintf("%s/api/s/%s", site.Controller.baseUrl, site.Name)
+		endpoint = fmt.Sprintf("%s/api/s/%s", site.controller.baseUrl, site.name)
 	}
 
 	if len(id) == 0 {
@@ -26,5 +66,4 @@ func (site *Site) createEndpointUrl(path string, id string) string {
 	} else {
 		return fmt.Sprintf("%s/%s/%s", endpoint, path, id)
 	}
-
 }
