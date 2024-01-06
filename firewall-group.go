@@ -27,7 +27,7 @@ type FirewallGroup struct {
 	GroupType string `json:"group_type,omitempty"`
 }
 
-// CreateFirewallGroup creates a new firewall group linked to this site
+// CreateFirewallGroup creates a new firewall group linked to this Site
 func (site *Site) CreateFirewallGroup(
 	newGroupData FirewallGroup, // The data of the new group
 ) (responseData FirewallGroupResponse, err error) {
@@ -79,7 +79,7 @@ func (site *Site) CreateFirewallGroup(
 	return responseData, nil
 }
 
-// GetAllFirewallGroups returns all firewall groups linked to this site
+// GetAllFirewallGroups returns all firewall groups linked to this Site
 func (site *Site) GetAllFirewallGroups() (responseData FirewallGroupResponse, err error) {
 	err = site.controller.verifyAuthentication()
 	if err != nil {
@@ -123,7 +123,7 @@ func (site *Site) GetAllFirewallGroups() (responseData FirewallGroupResponse, er
 	return responseData, nil
 }
 
-// GetFirewallGroup returns the firewall group linked to the given ID from this site
+// GetFirewallGroup returns the firewall group linked to the given ID and this Site
 func (site *Site) GetFirewallGroup(id string) (responseData FirewallGroupResponse, err error) {
 	err = site.controller.verifyAuthentication()
 	if err != nil {
@@ -167,7 +167,7 @@ func (site *Site) GetFirewallGroup(id string) (responseData FirewallGroupRespons
 	return responseData, nil
 }
 
-// UpdateFirewallGroup updates the firewall group linked to this site with the given ID
+// UpdateFirewallGroup updates the firewall group linked to the given ID and this Site
 func (site *Site) UpdateFirewallGroup(
 	id string, // The firewall group id
 	newGroupData FirewallGroup, // The updated group data
@@ -223,7 +223,7 @@ func (site *Site) UpdateFirewallGroup(
 	return responseData, nil
 }
 
-// DeleteFirewallGroup deletes the firewall group linked to the given ID from this site
+// DeleteFirewallGroup deletes the firewall group linked to the given ID and this Site
 func (site *Site) DeleteFirewallGroup(id string) (responseData FirewallGroupResponse, err error) {
 	err = site.controller.verifyAuthentication()
 	if err != nil {
