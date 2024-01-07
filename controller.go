@@ -9,24 +9,25 @@ import (
 	"time"
 )
 
-// A Controller is used to manage login state and to send requests linked to a UniFi Controller
+// A Controller is used to manage login state and to send requests linked to a UniFi controller
 type Controller struct {
-	// The base URL at which the UniFi Controller is reachable
+	// The URL at which the UniFi controller is reachable
 	baseUrl string
 	// The type of Controller (some controllers use different endpoints e.g. UDM-Pro)
 	controllerType string
-	// The cookie received from the UniFi Controller after login
+	// The cookie received from the UniFi controller after login
 	cookie *http.Cookie
-	// The CSRF token received from the UniFi Controller after login
+	// The CSRF token received from the UniFi controller after login
 	csrfToken string
 	// The http client used to make the requests
 	httpClient *http.Client
 	// The transport used by the http client when making the request
 	httpTransport *http.Transport
-	// Contains the users login info
+	// The user login info
 	loginInfo loginInfo
 }
 
+// A ControllerBuilder provides the ability to build a Controller
 type ControllerBuilder interface {
 	SetBaseUrl(baseUrl string) ControllerBuilder
 	SetControllerType(controllerType string) ControllerBuilder
@@ -35,24 +36,25 @@ type ControllerBuilder interface {
 	Build() (*Controller, error)
 }
 
+// A controllerBuilder helps to build a Controller
 type controllerBuilder struct {
 	controller *Controller
 }
 
-// NewControllerBuilder creates a builder that can be used to create a new Controller
+// NewControllerBuilder returns a builder that can be used to create a new Controller
 func NewControllerBuilder() ControllerBuilder {
 	return &controllerBuilder{
 		controller: &Controller{},
 	}
 }
 
-// SetBaseUrl sets the URL at which the UniFi Controller is reachable
+// SetBaseUrl sets the URL at which the UniFi controller is reachable
 func (builder *controllerBuilder) SetBaseUrl(baseUrl string) ControllerBuilder {
 	builder.controller.baseUrl = baseUrl
 	return builder
 }
 
-// SetControllerType sets the type of Controller (some controllers use different endpoints)
+// SetControllerType sets the type of UniFi controller (some controllers use different endpoints)
 // (not set uses default endpoints)
 func (builder *controllerBuilder) SetControllerType(controllerType string) ControllerBuilder {
 	builder.controller.controllerType = controllerType
@@ -115,7 +117,7 @@ func (builder *controllerBuilder) Build() (*Controller, error) {
 	return builder.controller, nil
 }
 
-// SetBaseUrl updates the URL at which the UniFi Controller is reachable
+// SetBaseUrl updates the URL at which the UniFi controller is reachable
 func (controller *Controller) SetBaseUrl(baseUrl string) error {
 	_, err := url.ParseRequestURI(baseUrl)
 	if err != nil {
@@ -131,7 +133,7 @@ func (controller *Controller) SetBaseUrl(baseUrl string) error {
 	return nil
 }
 
-// SetControllerType updates the type of Controller
+// SetControllerType updates the type of the UniFi controller
 func (controller *Controller) SetControllerType(controllerType string) {
 	controller.controllerType = controllerType
 }
@@ -149,16 +151,6 @@ func (controller *Controller) SetRequestTimout(timeout time.Duration) error {
 // SetTlsVerification updates whether TLS verification will be used
 func (controller *Controller) SetTlsVerification(verify bool) {
 	controller.httpTransport.TLSClientConfig.InsecureSkipVerify = !verify
-}
-
-// Meta is included in most responses and seems to contain extra information about the request
-type Meta struct {
-	// The response code (text) to indicate the response status
-	Rc string `json:"rc"`
-	// Used when indicating a group name was already used
-	Name string `json:"name,omitempty"`
-	// An error message to indicated what went wrong
-	Msg string `json:"msg,omitempty"`
 }
 
 // CreateDefaultSite creates and returns the default Site linked to this Controller

@@ -5,7 +5,7 @@ import (
 	"fmt"
 )
 
-// A Site is used to access site specific requests of a UniFi Controller
+// A Site is used to access site specific requests of a UniFi controller
 type Site struct {
 	// Reference to the controller managing the site
 	controller *Controller
@@ -13,17 +13,19 @@ type Site struct {
 	name string
 }
 
+// A SiteBuilder provides the ability to build a Site
 type SiteBuilder interface {
 	SetController(controller *Controller) SiteBuilder
 	SetName(name string) SiteBuilder
 	Build() (*Site, error)
 }
 
+// A siteBuilder helps to build a Site
 type siteBuilder struct {
 	site *Site
 }
 
-// NewSiteBuilder creates a builder that can be used to create a new Site
+// NewSiteBuilder returns a builder that can be used to create a new Site
 func NewSiteBuilder() SiteBuilder {
 	return &siteBuilder{
 		site: &Site{},
@@ -72,7 +74,7 @@ func (site *Site) SetName(name string) error {
 	return nil
 }
 
-// Returns the endpoint for the given path and ID (if not empty) based on the site and Controller
+// Returns the endpoint for the given path and ID (if not empty) based on the Site and Controller
 // type
 func (site *Site) createEndpointUrl(path string, id string) string {
 	var endpoint string

@@ -9,27 +9,40 @@ import (
 	"net/http"
 )
 
+// FirewallGroupResponse is the representation of a response of a firewall group request
 type FirewallGroupResponse struct {
-	Meta Meta            `json:"meta"`
-	Data []FirewallGroup `json:"data"`
+	Meta Meta                        `json:"meta"`
+	Data []FirewallGroupResponseData `json:"data"`
 }
 
+// FirewallGroupResponseData is the representation of the data inside the data array of the
+// FirewallGroupResponse
+type FirewallGroupResponseData struct {
+	FirewallGroup
+	DataValidationError
+}
+
+// FirewallGroup is the representation of a firewall group
 type FirewallGroup struct {
-	// The group data (e.g. IPv6 addresses)
+	// The group data
 	GroupMembers []string `json:"group_members,omitempty"`
 	// The group name
 	Name string `json:"name,omitempty"`
-	// The id of the site linked to this group
+	// The ID of the site this group is linked to
 	SiteId string `json:"site_id,omitempty"`
 	// The group ID
 	Id string `json:"_id,omitempty"`
-	// The type of group
+	// The type of group, options:
+	//	- address-group: Contains IPv4 addresses
+	//	- ipv6-address-group: Contains IPv6 addresses
+	//	- port-group: Contains port(s) and/or port range(s)
 	GroupType string `json:"group_type,omitempty"`
 }
 
 // CreateFirewallGroup creates a new firewall group linked to this Site
 func (site *Site) CreateFirewallGroup(
-	newGroupData FirewallGroup, // The data of the new group
+	// The data of the new group
+	newGroupData FirewallGroup,
 ) (responseData FirewallGroupResponse, err error) {
 	err = site.controller.verifyAuthentication()
 	if err != nil {
@@ -49,6 +62,7 @@ func (site *Site) CreateFirewallGroup(
 	}
 
 	site.controller.AuthorizeRequest(req)
+	req.Header.Set("Content-Type", "application/json")
 
 	res, err := site.controller.httpClient.Do(req)
 	if err != nil {
@@ -124,7 +138,10 @@ func (site *Site) GetAllFirewallGroups() (responseData FirewallGroupResponse, er
 }
 
 // GetFirewallGroup returns the firewall group linked to the given ID and this Site
-func (site *Site) GetFirewallGroup(id string) (responseData FirewallGroupResponse, err error) {
+func (site *Site) GetFirewallGroup(
+	// The firewall group ID
+	id string,
+) (responseData FirewallGroupResponse, err error) {
 	err = site.controller.verifyAuthentication()
 	if err != nil {
 		return
@@ -169,8 +186,10 @@ func (site *Site) GetFirewallGroup(id string) (responseData FirewallGroupRespons
 
 // UpdateFirewallGroup updates the firewall group linked to the given ID and this Site
 func (site *Site) UpdateFirewallGroup(
-	id string, // The firewall group id
-	newGroupData FirewallGroup, // The updated group data
+	// The firewall group ID
+	id string,
+	// The updated group data
+	newGroupData FirewallGroup,
 ) (responseData FirewallGroupResponse, err error) {
 	err = site.controller.verifyAuthentication()
 	if err != nil {
@@ -190,8 +209,6 @@ func (site *Site) UpdateFirewallGroup(
 	}
 
 	site.controller.AuthorizeRequest(req)
-
-	// Set content type
 	req.Header.Set("Content-Type", "application/json")
 
 	res, err := site.controller.httpClient.Do(req)
@@ -224,7 +241,10 @@ func (site *Site) UpdateFirewallGroup(
 }
 
 // DeleteFirewallGroup deletes the firewall group linked to the given ID and this Site
-func (site *Site) DeleteFirewallGroup(id string) (responseData FirewallGroupResponse, err error) {
+func (site *Site) DeleteFirewallGroup(
+	// The firewall group ID
+	id string,
+) (responseData FirewallGroupResponse, err error) {
 	err = site.controller.verifyAuthentication()
 	if err != nil {
 		return
