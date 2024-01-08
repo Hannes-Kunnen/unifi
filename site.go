@@ -13,49 +13,6 @@ type Site struct {
 	name string
 }
 
-// A SiteBuilder provides the ability to build a Site
-type SiteBuilder interface {
-	SetController(controller *Controller) SiteBuilder
-	SetName(name string) SiteBuilder
-	Build() (*Site, error)
-}
-
-// A siteBuilder helps to build a Site
-type siteBuilder struct {
-	site *Site
-}
-
-// NewSiteBuilder returns a builder that can be used to create a new Site
-func NewSiteBuilder() SiteBuilder {
-	return &siteBuilder{
-		site: &Site{},
-	}
-}
-
-// SetController links the Site to the given Controller
-func (builder *siteBuilder) SetController(controller *Controller) SiteBuilder {
-	builder.site.controller = controller
-	return builder
-}
-
-// SetName sets the name of the Site
-func (builder *siteBuilder) SetName(name string) SiteBuilder {
-	builder.site.name = name
-	return builder
-}
-
-// Build builds the Site and returns a reference to it
-func (builder *siteBuilder) Build() (*Site, error) {
-	if builder.site.controller == nil {
-		return nil, errors.New("site controller is required")
-	}
-
-	if len(builder.site.name) == 0 {
-		return nil, errors.New("site name is required")
-	}
-	return builder.site, nil
-}
-
 // SetController updates the Controller controlling the Site
 func (site *Site) SetController(controller *Controller) error {
 	if controller == nil {
