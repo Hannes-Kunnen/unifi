@@ -11,8 +11,8 @@ import (
 
 // Generic authentication errors
 var (
-	UnauthenticatedError = errors.New("cookie or CSRF token not set, login before continuing")
-	SessionExpiredError  = errors.New("cookie expired, re-login before continuing")
+	UnauthenticatedError = errors.New("unauthenticated, login before continuing")
+	SessionExpiredError  = errors.New("session expired, re-login before continuing")
 )
 
 // loginInfo is the representation of the body of a login request
