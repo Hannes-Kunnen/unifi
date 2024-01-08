@@ -9,22 +9,24 @@ import (
 	"time"
 )
 
-// Generic authentication errors
+// Generic authentication errors.
 var (
 	UnauthenticatedError = errors.New("unauthenticated, login before continuing")
 	SessionExpiredError  = errors.New("session expired, re-login before continuing")
 )
 
-// loginInfo is the representation of the body of a login request
+// loginInfo is the representation of the body of a login request.
 type loginInfo struct {
 	Username string `json:"username,omitempty"`
 	Password string `json:"password,omitempty"`
 }
 
 // Login authenticates the user at the UniFi controller using the given username and password and
-// saves the received cookie and CSRF token
+// saves the received cookie and CSRF token.
 func (controller *Controller) Login(
+	// The UniFi username for the UniFi controller.
 	username string,
+	// The UniFi password for the UniFi controller.
 	password string,
 ) error {
 	var endpointUrl string
@@ -84,7 +86,7 @@ func (controller *Controller) Login(
 }
 
 // Logout invalidates the current session credentials (cookie and CSRF token) and clears the
-// user credentials
+// user credentials.
 func (controller *Controller) Logout() error {
 	var endpointUrl string
 	switch controller.controllerType {
@@ -103,7 +105,7 @@ func (controller *Controller) Logout() error {
 		return errors.New(fmt.Sprintf("logout failed with response code %d\n", res.StatusCode))
 	}
 
-	// Clear cookie, CSRF token and user credentials
+	// Clear cookie, CSRF token and user credentials.
 	controller.cookie = nil
 	controller.csrfToken = ""
 	controller.loginInfo.Username = ""
@@ -113,7 +115,7 @@ func (controller *Controller) Logout() error {
 }
 
 // AuthorizeRequest adds the authorization cookie and CSRF token to the given http request.
-// If the current session has expired re-authentication is attempted
+// If the current session has expired re-authentication is attempted.
 func (controller *Controller) AuthorizeRequest(req *http.Request) error {
 	err := controller.AssertAuthenticated()
 
@@ -135,13 +137,13 @@ func (controller *Controller) AuthorizeRequest(req *http.Request) error {
 
 // AssertAuthenticated asserts that the Controller has received authentication and that the current
 // session is still valid. Based on the Controller state an UnauthenticatedError,
-// SessionExpiredError or no error will be returned
+// SessionExpiredError or no error will be returned.
 func (controller *Controller) AssertAuthenticated() error {
 	if controller.cookie == nil || controller.csrfToken == "" {
 		return UnauthenticatedError
 	}
 
-	// Mark session as expired 1 minute before expiration to account for clock skew
+	// Mark session as expired 1 minute before expiration to account for clock skew.
 	currentTime := time.Now().Add(-1 * time.Minute)
 	if controller.cookie.Expires.Before(currentTime) {
 		return SessionExpiredError

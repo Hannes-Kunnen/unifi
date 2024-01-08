@@ -5,15 +5,15 @@ import (
 	"fmt"
 )
 
-// A Site is used to access site specific requests of a UniFi controller
+// A Site is used to access site specific requests of a UniFi controller.
 type Site struct {
-	// Reference to the controller managing the site
+	// Reference to the controller managing the site.
 	controller *Controller
-	// Site name (as defined in the UniFi controller)
+	// Site name (as defined in the UniFi controller).
 	name string
 }
 
-// SetController updates the Controller controlling the Site
+// SetController updates the Controller controlling the Site.
 func (site *Site) SetController(controller *Controller) error {
 	if controller == nil {
 		return errors.New("site controller is required")
@@ -22,7 +22,7 @@ func (site *Site) SetController(controller *Controller) error {
 	return nil
 }
 
-// SetName updates the name of the Site
+// SetName updates the name of the Site.
 func (site *Site) SetName(name string) error {
 	if name == "" {
 		return errors.New("site name can not be empty")
@@ -32,7 +32,7 @@ func (site *Site) SetName(name string) error {
 }
 
 // Returns the endpoint for the given path and ID (if not empty) based on the Site and Controller
-// type
+// type.
 func (site *Site) createEndpointUrl(path string, id string) string {
 	var endpoint string
 	switch site.controller.controllerType {

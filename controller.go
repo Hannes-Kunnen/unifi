@@ -11,25 +11,25 @@ import (
 	"time"
 )
 
-// A Controller is used to manage login state and to send requests linked to a UniFi controller
+// A Controller is used to manage login state and to send requests linked to a UniFi controller.
 type Controller struct {
-	// The URL at which the UniFi controller is reachable
+	// The URL at which the UniFi controller is reachable.
 	baseUrl string
-	// The type of Controller (some controllers use different endpoints e.g. UDM-Pro)
+	// The type of Controller (some controllers use different endpoints e.g. UDM-Pro).
 	controllerType string
-	// The cookie received from the UniFi controller after login
+	// The cookie received from the UniFi controller after login.
 	cookie *http.Cookie
-	// The CSRF token received from the UniFi controller after login
+	// The CSRF token received from the UniFi controller after login.
 	csrfToken string
-	// The http client used to make the requests
+	// The http client used to make the requests.
 	httpClient *http.Client
-	// The transport used by the http client when making the request
+	// The transport used by the http client when making the request.
 	httpTransport *http.Transport
-	// The user login info
+	// The user login info.
 	loginInfo loginInfo
 }
 
-// SetBaseUrl updates the URL at which the UniFi controller is reachable
+// SetBaseUrl updates the URL at which the UniFi controller is reachable.
 func (controller *Controller) SetBaseUrl(baseUrl string) error {
 	_, err := url.ParseRequestURI(baseUrl)
 	if err != nil {
@@ -45,14 +45,14 @@ func (controller *Controller) SetBaseUrl(baseUrl string) error {
 	return nil
 }
 
-// SetControllerType updates the type of the UniFi controller
+// SetControllerType updates the type of the UniFi controller.
 func (controller *Controller) SetControllerType(controllerType string) {
 	controller.controllerType = controllerType
 }
 
-// SetRequestTimout updates the timeout to use when making http requests
+// SetRequestTimout updates the timeout to use when making http requests.
 func (controller *Controller) SetRequestTimout(timeout time.Duration) error {
-	// Verify request timeout is valid (negative timout is not documented)
+	// Verify request timeout is valid (negative timout is not documented).
 	if timeout < 0 {
 		return errors.New("timeout can not be smaller than 0")
 	}
@@ -60,12 +60,12 @@ func (controller *Controller) SetRequestTimout(timeout time.Duration) error {
 	return nil
 }
 
-// SetTlsVerification updates whether TLS verification will be used
+// SetTlsVerification updates whether TLS verification will be used.
 func (controller *Controller) SetTlsVerification(verify bool) {
 	controller.httpTransport.TLSClientConfig.InsecureSkipVerify = !verify
 }
 
-// CreateDefaultSite creates and returns a reference to the default Site linked to this Controller
+// CreateDefaultSite creates and returns a reference to the default Site linked to this Controller.
 func (controller *Controller) CreateDefaultSite() *Site {
 	return &Site{
 		name:       "default",
@@ -73,7 +73,8 @@ func (controller *Controller) CreateDefaultSite() *Site {
 	}
 }
 
-// CreateSite creates and returns a reference to the Site with given name linked to this Controller
+// CreateSite creates and returns a reference to the Site with given name linked to this
+// Controller.
 func (controller *Controller) CreateSite(name string) Site {
 	return Site{
 		name:       name,
@@ -127,7 +128,7 @@ func (controller *Controller) execute(
 		}
 	}(res.Body)
 
-	// If no response data reference is included, the body is not parsed
+	// If no response data reference is included, the body is not parsed.
 	if responseData == nil {
 		return res, nil
 	}

@@ -6,39 +6,39 @@ import (
 	"net/http"
 )
 
-// FirewallGroupResponse is the representation of a response of a firewall group request
+// FirewallGroupResponse is the representation of a response of a firewall group request.
 type FirewallGroupResponse struct {
 	Meta Meta                        `json:"meta"`
 	Data []FirewallGroupResponseData `json:"data"`
 }
 
 // FirewallGroupResponseData is the representation of the data inside the data array of the
-// FirewallGroupResponse
+// FirewallGroupResponse.
 type FirewallGroupResponseData struct {
 	FirewallGroup
 	DataValidationError
 }
 
-// FirewallGroup is the representation of a firewall group
+// FirewallGroup is the representation of a firewall group.
 type FirewallGroup struct {
-	// The group data
+	// The group data.
 	GroupMembers []string `json:"group_members,omitempty"`
-	// The group name
+	// The group name.
 	Name string `json:"name,omitempty"`
-	// The ID of the site this group is linked to
+	// The ID of the site this group is linked to.
 	SiteId string `json:"site_id,omitempty"`
-	// The group ID
+	// The group ID.
 	Id string `json:"_id,omitempty"`
 	// The type of group, options:
-	//	- address-group: Contains IPv4 addresses
-	//	- ipv6-address-group: Contains IPv6 addresses
-	//	- port-group: Contains port(s) and/or port range(s)
+	//	- address-group: Contains IPv4 addresses.
+	//	- ipv6-address-group: Contains IPv6 addresses.
+	//	- port-group: Contains port(s) and/or port range(s).
 	GroupType string `json:"group_type,omitempty"`
 }
 
-// CreateFirewallGroup creates a new firewall group linked to this Site
+// CreateFirewallGroup creates a new firewall group linked to this Site.
 func (site *Site) CreateFirewallGroup(
-	// The data of the new group
+	// The data of the new group.
 	firewallGroup FirewallGroup,
 ) (FirewallGroupResponse, error) {
 	responseData := FirewallGroupResponse{}
@@ -58,7 +58,7 @@ func (site *Site) CreateFirewallGroup(
 	return responseData, nil
 }
 
-// GetAllFirewallGroups returns all firewall groups linked to this Site
+// GetAllFirewallGroups returns all firewall groups linked to this Site.
 func (site *Site) GetAllFirewallGroups() (FirewallGroupResponse, error) {
 	endpointUrl := site.createEndpointUrl("rest/firewallgroup", "")
 	responseData := FirewallGroupResponse{}
@@ -77,9 +77,9 @@ func (site *Site) GetAllFirewallGroups() (FirewallGroupResponse, error) {
 	return responseData, nil
 }
 
-// GetFirewallGroup returns the firewall group linked to the given ID and this Site
+// GetFirewallGroup returns the firewall group linked to the given ID and this Site.
 func (site *Site) GetFirewallGroup(
-	// The firewall group ID
+	// The firewall group ID.
 	id string,
 ) (FirewallGroupResponse, error) {
 	endpointUrl := site.createEndpointUrl("rest/firewallgroup", id)
@@ -99,11 +99,11 @@ func (site *Site) GetFirewallGroup(
 	return responseData, nil
 }
 
-// UpdateFirewallGroup updates the firewall group linked to the given ID and this Site
+// UpdateFirewallGroup updates the firewall group linked to the given ID and this Site.
 func (site *Site) UpdateFirewallGroup(
-	// The firewall group ID
+	// The firewall group ID.
 	id string,
-	// The updated group data
+	// The updated group data.
 	firewallGroup FirewallGroup,
 ) (FirewallGroupResponse, error) {
 	endpointUrl := site.createEndpointUrl("rest/firewallgroup", id)
@@ -123,9 +123,9 @@ func (site *Site) UpdateFirewallGroup(
 	return responseData, nil
 }
 
-// DeleteFirewallGroup deletes the firewall group linked to the given ID and this Site
+// DeleteFirewallGroup deletes the firewall group linked to the given ID and this Site.
 func (site *Site) DeleteFirewallGroup(
-	// The firewall group ID
+	// The firewall group ID.
 	id string,
 ) (FirewallGroupResponse, error) {
 	endpointUrl := site.createEndpointUrl("rest/firewallgroup", id)
