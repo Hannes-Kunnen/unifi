@@ -1,11 +1,8 @@
 package unifi
 
 import (
-	"bytes"
-	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"net/http"
 )
 
@@ -42,46 +39,14 @@ type FirewallGroup struct {
 // CreateFirewallGroup creates a new firewall group linked to this Site
 func (site *Site) CreateFirewallGroup(
 	// The data of the new group
-	newGroupData FirewallGroup,
-) (responseData FirewallGroupResponse, err error) {
-	err = site.controller.verifyAuthentication()
-	if err != nil {
-		return
-	}
-
-	byteArray, err := json.Marshal(newGroupData)
-	if err != nil {
-		return
-	}
-
+	firewallGroup FirewallGroup,
+) (FirewallGroupResponse, error) {
+	responseData := FirewallGroupResponse{}
 	endpointUrl := site.createEndpointUrl("rest/firewallgroup", "")
-	payload := bytes.NewBuffer(byteArray)
-	req, err := http.NewRequest(`POST`, endpointUrl, payload)
-	if err != nil {
-		return
-	}
 
-	site.controller.AuthorizeRequest(req)
-	req.Header.Set("Content-Type", "application/json")
-
-	res, err := site.controller.httpClient.Do(req)
+	res, err := site.controller.execute(http.MethodPost, endpointUrl, firewallGroup, &responseData)
 	if err != nil {
-		return
-	}
-
-	responseBody, err := io.ReadAll(res.Body)
-	if err != nil {
-	}
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
-			fmt.Println(err)
-		}
-	}(res.Body)
-
-	err = json.Unmarshal(responseBody, &responseData)
-	if err != nil {
-		return
+		return responseData, err
 	}
 
 	if res.StatusCode != 200 {
@@ -94,38 +59,13 @@ func (site *Site) CreateFirewallGroup(
 }
 
 // GetAllFirewallGroups returns all firewall groups linked to this Site
-func (site *Site) GetAllFirewallGroups() (responseData FirewallGroupResponse, err error) {
-	err = site.controller.verifyAuthentication()
-	if err != nil {
-		return
-	}
-
+func (site *Site) GetAllFirewallGroups() (FirewallGroupResponse, error) {
 	endpointUrl := site.createEndpointUrl("rest/firewallgroup", "")
-	req, err := http.NewRequest(`GET`, endpointUrl, nil)
-	if err != nil {
-		return
-	}
+	responseData := FirewallGroupResponse{}
 
-	site.controller.AuthorizeRequest(req)
-
-	res, err := site.controller.httpClient.Do(req)
+	res, err := site.controller.execute(http.MethodGet, endpointUrl, nil, &responseData)
 	if err != nil {
-		return
-	}
-
-	responseBody, err := io.ReadAll(res.Body)
-	if err != nil {
-	}
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
-			fmt.Println(err)
-		}
-	}(res.Body)
-
-	err = json.Unmarshal(responseBody, &responseData)
-	if err != nil {
-		return
+		return responseData, err
 	}
 
 	if res.StatusCode != 200 {
@@ -141,38 +81,13 @@ func (site *Site) GetAllFirewallGroups() (responseData FirewallGroupResponse, er
 func (site *Site) GetFirewallGroup(
 	// The firewall group ID
 	id string,
-) (responseData FirewallGroupResponse, err error) {
-	err = site.controller.verifyAuthentication()
-	if err != nil {
-		return
-	}
-
+) (FirewallGroupResponse, error) {
 	endpointUrl := site.createEndpointUrl("rest/firewallgroup", id)
-	req, err := http.NewRequest(`GET`, endpointUrl, nil)
-	if err != nil {
-		return
-	}
+	responseData := FirewallGroupResponse{}
 
-	site.controller.AuthorizeRequest(req)
-
-	res, err := site.controller.httpClient.Do(req)
+	res, err := site.controller.execute(http.MethodGet, endpointUrl, nil, &responseData)
 	if err != nil {
-		return
-	}
-
-	responseBody, err := io.ReadAll(res.Body)
-	if err != nil {
-	}
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
-			fmt.Println(err)
-		}
-	}(res.Body)
-
-	err = json.Unmarshal(responseBody, &responseData)
-	if err != nil {
-		return
+		return responseData, err
 	}
 
 	if res.StatusCode != 200 {
@@ -189,46 +104,14 @@ func (site *Site) UpdateFirewallGroup(
 	// The firewall group ID
 	id string,
 	// The updated group data
-	newGroupData FirewallGroup,
-) (responseData FirewallGroupResponse, err error) {
-	err = site.controller.verifyAuthentication()
-	if err != nil {
-		return
-	}
-
-	byteArray, err := json.Marshal(newGroupData)
-	if err != nil {
-		return
-	}
-
+	firewallGroup FirewallGroup,
+) (FirewallGroupResponse, error) {
 	endpointUrl := site.createEndpointUrl("rest/firewallgroup", id)
-	payload := bytes.NewBuffer(byteArray)
-	req, err := http.NewRequest(`PUT`, endpointUrl, payload)
-	if err != nil {
-		return
-	}
+	responseData := FirewallGroupResponse{}
 
-	site.controller.AuthorizeRequest(req)
-	req.Header.Set("Content-Type", "application/json")
-
-	res, err := site.controller.httpClient.Do(req)
+	res, err := site.controller.execute(http.MethodPut, endpointUrl, firewallGroup, &responseData)
 	if err != nil {
-		return
-	}
-
-	responseBody, err := io.ReadAll(res.Body)
-	if err != nil {
-	}
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
-			fmt.Println(err)
-		}
-	}(res.Body)
-
-	err = json.Unmarshal(responseBody, &responseData)
-	if err != nil {
-		return
+		return responseData, err
 	}
 
 	if res.StatusCode != 200 {
@@ -244,38 +127,13 @@ func (site *Site) UpdateFirewallGroup(
 func (site *Site) DeleteFirewallGroup(
 	// The firewall group ID
 	id string,
-) (responseData FirewallGroupResponse, err error) {
-	err = site.controller.verifyAuthentication()
-	if err != nil {
-		return
-	}
-
+) (FirewallGroupResponse, error) {
 	endpointUrl := site.createEndpointUrl("rest/firewallgroup", id)
-	req, err := http.NewRequest(`DELETE`, endpointUrl, nil)
-	if err != nil {
-		return
-	}
+	responseData := FirewallGroupResponse{}
 
-	site.controller.AuthorizeRequest(req)
-
-	res, err := site.controller.httpClient.Do(req)
+	res, err := site.controller.execute(http.MethodDelete, endpointUrl, nil, &responseData)
 	if err != nil {
-		return
-	}
-
-	responseBody, err := io.ReadAll(res.Body)
-	if err != nil {
-	}
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
-			fmt.Println(err)
-		}
-	}(res.Body)
-
-	err = json.Unmarshal(responseBody, &responseData)
-	if err != nil {
-		return
+		return responseData, err
 	}
 
 	if res.StatusCode != 200 {

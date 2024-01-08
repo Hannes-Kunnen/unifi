@@ -86,33 +86,21 @@ func (controller *Controller) Login(
 // Logout invalidates the current session credentials (cookie and CSRF token) and clears the
 // user credentials
 func (controller *Controller) Logout() error {
-	err := controller.AssertAuthenticated()
+	var endpointUrl string
+	switch controller.controllerType {
+	case "UDM-Pro":
+		endpointUrl = fmt.Sprintf("%s/api/auth/logout", controller.baseUrl)
+	default:
+		endpointUrl = fmt.Sprintf("%s/api/logout", controller.baseUrl)
+	}
 
-	// Only perform logout request when logged in
-	if err == nil {
-		var endpointUrl string
-		switch controller.controllerType {
-		case "UDM-Pro":
-			endpointUrl = fmt.Sprintf("%s/api/auth/logout", controller.baseUrl)
-		default:
-			endpointUrl = fmt.Sprintf("%s/api/logout", controller.baseUrl)
-		}
+	res, err := controller.execute(http.MethodPost, endpointUrl, nil, nil)
+	if err != nil {
+		return err
+	}
 
-		req, err := http.NewRequest(`POST`, endpointUrl, nil)
-		if err != nil {
-			return err
-		}
-
-		controller.AuthorizeRequest(req)
-
-		res, err := controller.httpClient.Do(req)
-		if err != nil {
-			return err
-		}
-
-		if res.StatusCode != 200 {
-			return errors.New(fmt.Sprintf("logout failed with response code %d\n", res.StatusCode))
-		}
+	if res.StatusCode != 200 {
+		return errors.New(fmt.Sprintf("logout failed with response code %d\n", res.StatusCode))
 	}
 
 	// Clear cookie, CSRF token and user credentials
@@ -124,10 +112,25 @@ func (controller *Controller) Logout() error {
 	return nil
 }
 
-// AuthorizeRequest adds the authorization cookie and CSRF token to the given http request
-func (controller *Controller) AuthorizeRequest(req *http.Request) {
-	req.AddCookie(controller.cookie)
-	req.Header.Set("X-CSRF-Token", controller.csrfToken)
+// AuthorizeRequest adds the authorization cookie and CSRF token to the given http request.
+// If the current session has expired re-authentication is attempted
+func (controller *Controller) AuthorizeRequest(req *http.Request) error {
+	err := controller.AssertAuthenticated()
+
+	if err != nil && errors.Is(err, SessionExpiredError) {
+		err = controller.Login(
+			controller.loginInfo.Username,
+			controller.loginInfo.Password,
+		)
+	}
+
+	if err == nil {
+		req.AddCookie(controller.cookie)
+		req.Header.Set("X-CSRF-Token", controller.csrfToken)
+		return nil
+	}
+
+	return err
 }
 
 // AssertAuthenticated asserts that the Controller has received authentication and that the current
@@ -138,28 +141,11 @@ func (controller *Controller) AssertAuthenticated() error {
 		return UnauthenticatedError
 	}
 
-	if controller.cookie.Expires.Before(time.Now()) {
+	// Mark session as expired 1 minute before expiration to account for clock skew
+	currentTime := time.Now().Add(-1 * time.Minute)
+	if controller.cookie.Expires.Before(currentTime) {
 		return SessionExpiredError
 	}
 
 	return nil
-}
-
-// verifyAuthentication verifies the controller has valid authentication credentials and tries to
-// re-authenticate if the current session has expired
-func (controller *Controller) verifyAuthentication() error {
-	err := controller.AssertAuthenticated()
-
-	if errors.Is(err, SessionExpiredError) {
-		err = controller.Login(
-			controller.loginInfo.Username,
-			controller.loginInfo.Password,
-		)
-		if err != nil {
-			return err
-		}
-	}
-
-	// Return error (either original or login error)
-	return err
 }

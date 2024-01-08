@@ -1,8 +1,11 @@
 package unifi
 
 import (
+	"bytes"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"net/url"
 	"time"
@@ -76,4 +79,68 @@ func (controller *Controller) CreateSite(name string) Site {
 		name:       name,
 		controller: controller,
 	}
+}
+
+// Executes a request with given method to the given endpoint URL, if a body is included it will be
+// transformed to JSON and added as a request body. If responseData is set the response body will
+// be parsed and the value will be stored in this variable.
+func (controller *Controller) execute(
+	method string,
+	endpointUrl string,
+	body any,
+	responseData any,
+) (*http.Response, error) {
+	var req *http.Request
+	var err error
+	if body == nil {
+		req, err = http.NewRequest(method, endpointUrl, http.NoBody)
+	} else {
+		requestBodyByteArray, marshalError := json.Marshal(body)
+		if marshalError != nil {
+			return nil, marshalError
+		}
+
+		req, err = http.NewRequest(method, endpointUrl, bytes.NewBuffer(requestBodyByteArray))
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	err = controller.AuthorizeRequest(req)
+	if err != nil {
+		return nil, err
+	}
+
+	if body != nil && (method == http.MethodPost || method == http.MethodPut) {
+		req.Header.Set("Content-Type", "application/json")
+	}
+
+	var res *http.Response
+	res, err = controller.httpClient.Do(req)
+	if err != nil {
+		return res, err
+	}
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			fmt.Println(err)
+		}
+	}(res.Body)
+
+	// If no response data reference is included, the body is not parsed
+	if responseData == nil {
+		return res, nil
+	}
+
+	responseBodyByteArray, err := io.ReadAll(res.Body)
+	if err != nil {
+		return res, err
+	}
+
+	err = json.Unmarshal(responseBodyByteArray, responseData)
+	if err != nil {
+		return res, err
+	}
+
+	return res, nil
 }

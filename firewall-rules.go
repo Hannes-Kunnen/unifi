@@ -1,11 +1,8 @@
 package unifi
 
 import (
-	"bytes"
-	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"net/http"
 )
 
@@ -133,46 +130,14 @@ type FirewallRule struct {
 // CreateFirewallRule creates a new firewall rule linked to this Site
 func (site *Site) CreateFirewallRule(
 	// The data of the new rule
-	newRuleData FirewallRule,
-) (responseData FirewallRuleResponse, err error) {
-	err = site.controller.verifyAuthentication()
-	if err != nil {
-		return
-	}
-
-	byteArray, err := json.Marshal(newRuleData)
-	if err != nil {
-		return
-	}
-
+	firewallRule FirewallRule,
+) (FirewallRuleResponse, error) {
 	endpointUrl := site.createEndpointUrl("rest/firewallrule", "")
-	payload := bytes.NewBuffer(byteArray)
-	req, err := http.NewRequest(`POST`, endpointUrl, payload)
-	if err != nil {
-		return
-	}
+	responseData := FirewallRuleResponse{}
 
-	site.controller.AuthorizeRequest(req)
-	req.Header.Set("Content-Type", "application/json")
-
-	res, err := site.controller.httpClient.Do(req)
+	res, err := site.controller.execute(http.MethodPost, endpointUrl, firewallRule, &responseData)
 	if err != nil {
-		return
-	}
-
-	responseBody, err := io.ReadAll(res.Body)
-	if err != nil {
-	}
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
-			fmt.Println(err)
-		}
-	}(res.Body)
-
-	err = json.Unmarshal(responseBody, &responseData)
-	if err != nil {
-		return
+		return responseData, err
 	}
 
 	if res.StatusCode != 200 {
@@ -185,38 +150,13 @@ func (site *Site) CreateFirewallRule(
 }
 
 // GetAllFirewallRules returns all firewall rules linked to this Site
-func (site *Site) GetAllFirewallRules() (responseData FirewallRuleResponse, err error) {
-	err = site.controller.verifyAuthentication()
-	if err != nil {
-		return
-	}
-
+func (site *Site) GetAllFirewallRules() (FirewallRuleResponse, error) {
 	endpointUrl := site.createEndpointUrl("rest/firewallrule", "")
-	req, err := http.NewRequest(`GET`, endpointUrl, nil)
-	if err != nil {
-		return
-	}
+	responseData := FirewallRuleResponse{}
 
-	site.controller.AuthorizeRequest(req)
-
-	res, err := site.controller.httpClient.Do(req)
+	res, err := site.controller.execute(http.MethodGet, endpointUrl, nil, &responseData)
 	if err != nil {
-		return
-	}
-
-	responseBody, err := io.ReadAll(res.Body)
-	if err != nil {
-	}
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
-			fmt.Println(err)
-		}
-	}(res.Body)
-
-	err = json.Unmarshal(responseBody, &responseData)
-	if err != nil {
-		return
+		return responseData, err
 	}
 
 	if res.StatusCode != 200 {
@@ -232,38 +172,13 @@ func (site *Site) GetAllFirewallRules() (responseData FirewallRuleResponse, err 
 func (site *Site) GetFirewallRule(
 	// The firewall rule ID
 	id string,
-) (responseData FirewallRuleResponse, err error) {
-	err = site.controller.verifyAuthentication()
-	if err != nil {
-		return
-	}
-
+) (FirewallRuleResponse, error) {
 	endpointUrl := site.createEndpointUrl("rest/firewallrule", id)
-	req, err := http.NewRequest(`GET`, endpointUrl, nil)
-	if err != nil {
-		return
-	}
+	responseData := FirewallRuleResponse{}
 
-	site.controller.AuthorizeRequest(req)
-
-	res, err := site.controller.httpClient.Do(req)
+	res, err := site.controller.execute(http.MethodGet, endpointUrl, nil, &responseData)
 	if err != nil {
-		return
-	}
-
-	responseBody, err := io.ReadAll(res.Body)
-	if err != nil {
-	}
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
-			fmt.Println(err)
-		}
-	}(res.Body)
-
-	err = json.Unmarshal(responseBody, &responseData)
-	if err != nil {
-		return
+		return responseData, err
 	}
 
 	if res.StatusCode != 200 {
@@ -280,46 +195,14 @@ func (site *Site) UpdateFirewallRule(
 	// The firewall rule ID
 	id string,
 	// The updated rule data
-	newRuleData FirewallRule,
-) (responseData FirewallRuleResponse, err error) {
-	err = site.controller.verifyAuthentication()
-	if err != nil {
-		return
-	}
-
-	byteArray, err := json.Marshal(newRuleData)
-	if err != nil {
-		return
-	}
-
+	firewallRule FirewallRule,
+) (FirewallRuleResponse, error) {
 	endpointUrl := site.createEndpointUrl("rest/firewallrule", id)
-	payload := bytes.NewBuffer(byteArray)
-	req, err := http.NewRequest(`PUT`, endpointUrl, payload)
-	if err != nil {
-		return
-	}
+	responseData := FirewallRuleResponse{}
 
-	site.controller.AuthorizeRequest(req)
-	req.Header.Set("Content-Type", "application/json")
-
-	res, err := site.controller.httpClient.Do(req)
+	res, err := site.controller.execute(http.MethodPut, endpointUrl, firewallRule, &responseData)
 	if err != nil {
-		return
-	}
-
-	responseBody, err := io.ReadAll(res.Body)
-	if err != nil {
-	}
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
-			fmt.Println(err)
-		}
-	}(res.Body)
-
-	err = json.Unmarshal(responseBody, &responseData)
-	if err != nil {
-		return
+		return responseData, err
 	}
 
 	if res.StatusCode != 200 {
@@ -335,38 +218,13 @@ func (site *Site) UpdateFirewallRule(
 func (site *Site) DeleteFirewallRule(
 	// The firewall rule ID
 	id string,
-) (responseData FirewallRuleResponse, err error) {
-	err = site.controller.verifyAuthentication()
-	if err != nil {
-		return
-	}
-
+) (FirewallRuleResponse, error) {
 	endpointUrl := site.createEndpointUrl("rest/firewallrule", id)
-	req, err := http.NewRequest(`DELETE`, endpointUrl, nil)
-	if err != nil {
-		return
-	}
+	responseData := FirewallRuleResponse{}
 
-	site.controller.AuthorizeRequest(req)
-
-	res, err := site.controller.httpClient.Do(req)
+	res, err := site.controller.execute(http.MethodDelete, endpointUrl, nil, &responseData)
 	if err != nil {
-		return
-	}
-
-	responseBody, err := io.ReadAll(res.Body)
-	if err != nil {
-	}
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
-			fmt.Println(err)
-		}
-	}(res.Body)
-
-	err = json.Unmarshal(responseBody, &responseData)
-	if err != nil {
-		return
+		return responseData, err
 	}
 
 	if res.StatusCode != 200 {
