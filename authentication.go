@@ -76,7 +76,7 @@ func (controller *Controller) Login(
 	}
 
 	controller.csrfToken = res.Header.Get(`X-CSRF-token`)
-	if len(controller.csrfToken) == 0 {
+	if controller.csrfToken == "" {
 		return errors.New("failed to extract CSRF token from response header")
 	}
 
@@ -137,7 +137,7 @@ func (controller *Controller) AuthorizeRequest(req *http.Request) error {
 // session is still valid. Based on the Controller state an UnauthenticatedError,
 // SessionExpiredError or no error will be returned
 func (controller *Controller) AssertAuthenticated() error {
-	if controller.cookie == nil || len(controller.csrfToken) == 0 {
+	if controller.cookie == nil || controller.csrfToken == "" {
 		return UnauthenticatedError
 	}
 

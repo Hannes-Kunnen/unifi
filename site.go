@@ -24,7 +24,7 @@ func (site *Site) SetController(controller *Controller) error {
 
 // SetName updates the name of the Site
 func (site *Site) SetName(name string) error {
-	if len(name) == 0 {
+	if name == "" {
 		return errors.New("site name can not be empty")
 	}
 	site.name = name
@@ -42,7 +42,7 @@ func (site *Site) createEndpointUrl(path string, id string) string {
 		endpoint = fmt.Sprintf("%s/api/s/%s", site.controller.baseUrl, site.name)
 	}
 
-	if len(id) == 0 {
+	if id == "" {
 		return fmt.Sprintf("%s/%s", endpoint, path)
 	} else {
 		return fmt.Sprintf("%s/%s/%s", endpoint, path, id)
