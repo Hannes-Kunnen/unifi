@@ -128,6 +128,12 @@ func (controller *Controller) execute(
 		}
 	}(res.Body)
 
+	// If response contains a CSRF token, replace the current one (in case it changes).
+	newCsrfToken := res.Header.Get(`X-CSRF-token`)
+	if newCsrfToken != "" {
+		controller.csrfToken = newCsrfToken
+	}
+
 	// If no response data reference is included, the body is not parsed.
 	if responseData == nil {
 		return res, nil
