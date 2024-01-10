@@ -102,7 +102,7 @@ func (controller *Controller) Logout() error {
 	}
 
 	if res.StatusCode != 200 {
-		return errors.New(fmt.Sprintf("logout failed with response code %d\n", res.StatusCode))
+		return errors.New(fmt.Sprintf("logout failed with response code %d", res.StatusCode))
 	}
 
 	// Clear cookie, CSRF token and user credentials.

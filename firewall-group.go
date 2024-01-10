@@ -70,7 +70,7 @@ func (site *Site) GetAllFirewallGroups() (FirewallGroupResponse, error) {
 
 	if res.StatusCode != 200 {
 		return responseData, errors.New(
-			fmt.Sprintf("retreiving firewall groups failed with response code %d\n", res.StatusCode),
+			fmt.Sprintf("retreiving firewall groups failed with response code %d", res.StatusCode),
 		)
 	}
 
@@ -92,7 +92,7 @@ func (site *Site) GetFirewallGroup(
 
 	if res.StatusCode != 200 {
 		return responseData, errors.New(
-			fmt.Sprintf("retreiving firewall group failed with response code %d\n", res.StatusCode),
+			fmt.Sprintf("retreiving firewall group failed with response code %d", res.StatusCode),
 		)
 	}
 
@@ -116,7 +116,7 @@ func (site *Site) UpdateFirewallGroup(
 
 	if res.StatusCode != 200 {
 		return responseData, errors.New(
-			fmt.Sprintf("firewall group update failed with response code %d\n", res.StatusCode),
+			fmt.Sprintf("firewall group update failed with response code %d", res.StatusCode),
 		)
 	}
 
@@ -138,7 +138,7 @@ func (site *Site) DeleteFirewallGroup(
 
 	if res.StatusCode != 200 {
 		return responseData, errors.New(
-			fmt.Sprintf("deleting firewall group failed with response code %d\n", res.StatusCode),
+			fmt.Sprintf("deleting firewall group failed with response code %d", res.StatusCode),
 		)
 	}
 

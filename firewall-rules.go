@@ -161,7 +161,7 @@ func (site *Site) GetAllFirewallRules() (FirewallRuleResponse, error) {
 
 	if res.StatusCode != 200 {
 		return responseData, errors.New(
-			fmt.Sprintf("retreiving firewall rules failed with response code %d\n", res.StatusCode),
+			fmt.Sprintf("retreiving firewall rules failed with response code %d", res.StatusCode),
 		)
 	}
 
@@ -183,7 +183,7 @@ func (site *Site) GetFirewallRule(
 
 	if res.StatusCode != 200 {
 		return responseData, errors.New(
-			fmt.Sprintf("retreiving firewall rule failed with response code %d\n", res.StatusCode),
+			fmt.Sprintf("retreiving firewall rule failed with response code %d", res.StatusCode),
 		)
 	}
 
@@ -207,7 +207,7 @@ func (site *Site) UpdateFirewallRule(
 
 	if res.StatusCode != 200 {
 		return responseData, errors.New(
-			fmt.Sprintf("firewall rule update failed with response code %d\n", res.StatusCode),
+			fmt.Sprintf("firewall rule update failed with response code %d", res.StatusCode),
 		)
 	}
 
@@ -229,7 +229,7 @@ func (site *Site) DeleteFirewallRule(
 
 	if res.StatusCode != 200 {
 		return responseData, errors.New(
-			fmt.Sprintf("deleting firewall rule failed with response code %d\n", res.StatusCode),
+			fmt.Sprintf("deleting firewall rule failed with response code %d", res.StatusCode),
 		)
 	}
 
