@@ -13,7 +13,8 @@ type FirewallRuleResponse struct {
 }
 
 // FirewallRuleResponseData is the representation of the data inside the data array of the
-// FirewallRuleResponse.
+// [FirewallRuleResponse]. It contains either [FirewallRule] or [DataValidationError] based on
+// whether the request succeeded.
 type FirewallRuleResponseData struct {
 	FirewallRule
 	DataValidationError
@@ -243,8 +244,8 @@ type FirewallRule struct {
 	Logging bool `json:"logging,omitempty"`
 }
 
-// CreateFirewallRule creates a new firewall rule linked to this Site using the given firewall rule
-// data. It will return an error if the creation of the firewall rule failed.
+// CreateFirewallRule creates a new firewall rule linked to this [Site] using the given firewall
+// rule data. It will return an error if the creation of the firewall rule failed.
 func (site *Site) CreateFirewallRule(firewallRule FirewallRule) (FirewallRuleResponse, error) {
 	endpointUrl := site.createEndpointUrl("rest/firewallrule", "")
 	responseData := FirewallRuleResponse{}
@@ -263,7 +264,7 @@ func (site *Site) CreateFirewallRule(firewallRule FirewallRule) (FirewallRuleRes
 	return responseData, nil
 }
 
-// GetAllFirewallRules returns all firewall rules linked to this Site.
+// GetAllFirewallRules returns all firewall rules linked to this [Site].
 // It will return an error if it fails to fetch the firewall rules.
 func (site *Site) GetAllFirewallRules() (FirewallRuleResponse, error) {
 	endpointUrl := site.createEndpointUrl("rest/firewallrule", "")
@@ -283,7 +284,7 @@ func (site *Site) GetAllFirewallRules() (FirewallRuleResponse, error) {
 	return responseData, nil
 }
 
-// GetFirewallRule returns the firewall rule linked to the given ID and this Site.
+// GetFirewallRule returns the firewall rule linked to the given ID and this [Site].
 // It will return an error if it fails to fetch the specific firewall rule, however if no rule
 // with the given ID is present or the ID is invalid no error but a response with an empty data
 // array will be returned.
@@ -305,7 +306,7 @@ func (site *Site) GetFirewallRule(id string) (FirewallRuleResponse, error) {
 	return responseData, nil
 }
 
-// UpdateFirewallRule updates the firewall rule linked to the given ID and this Site using the
+// UpdateFirewallRule updates the firewall rule linked to the given ID and this [Site] using the
 // given firewall rule data. It will return an error if the update of the firewall rule failed.
 func (site *Site) UpdateFirewallRule(
 	id string,
@@ -328,7 +329,7 @@ func (site *Site) UpdateFirewallRule(
 	return responseData, nil
 }
 
-// DeleteFirewallRule deletes the firewall rule linked to the given ID and this Site.
+// DeleteFirewallRule deletes the firewall rule linked to the given ID and this [Site].
 // It will return an error if the deletion of the firewall rule failed.
 func (site *Site) DeleteFirewallRule(id string) (FirewallRuleResponse, error) {
 	endpointUrl := site.createEndpointUrl("rest/firewallrule", id)

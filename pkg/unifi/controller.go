@@ -12,6 +12,7 @@ import (
 )
 
 // A Controller is used to manage login state and to send requests linked to a UniFi controller.
+// A Controller can be created using the [ControllerBuilder] and its methods.
 type Controller struct {
 	// The URL at which the UniFi controller is reachable.
 	baseUrl string
@@ -67,7 +68,8 @@ func (controller *Controller) SetTlsVerification(verify bool) {
 	controller.httpTransport.TLSClientConfig.InsecureSkipVerify = !verify
 }
 
-// CreateDefaultSite creates and returns a reference to the default Site linked to this Controller.
+// CreateDefaultSite creates and returns a reference to the default [Site] linked to this
+// [Controller].
 func (controller *Controller) CreateDefaultSite() *Site {
 	return &Site{
 		name:       "default",
@@ -75,8 +77,8 @@ func (controller *Controller) CreateDefaultSite() *Site {
 	}
 }
 
-// CreateSite creates and returns a reference to the Site with given name linked to this
-// Controller.
+// CreateSite creates and returns a reference to the [Site] with given name linked to this
+// [Controller].
 func (controller *Controller) CreateSite(name string) Site {
 	return Site{
 		name:       name,

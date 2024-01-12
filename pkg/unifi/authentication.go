@@ -111,7 +111,7 @@ func (controller *Controller) Logout() error {
 
 // AuthorizeRequest adds the authorization cookie and CSRF token to the given http request.
 // If the current session has expired re-authentication is attempted.
-// It returns an UnauthenticatedError if the Controller has not received authentication, a login
+// It returns an [UnauthenticatedError] if the [Controller] has not received authentication, a login
 // error can also be returned if re-authentication was attempted and the login failed.
 func (controller *Controller) AuthorizeRequest(req *http.Request) error {
 	err := controller.AssertAuthenticated()
@@ -132,9 +132,9 @@ func (controller *Controller) AuthorizeRequest(req *http.Request) error {
 	return err
 }
 
-// AssertAuthenticated asserts that the Controller has received authentication and that the current
-// session is still valid. Based on the Controller state an UnauthenticatedError,
-// SessionExpiredError or no error will be returned.
+// AssertAuthenticated asserts that the [Controller] has received authentication and that the current
+// session is still valid. Based on the [Controller] state an [UnauthenticatedError],
+// [SessionExpiredError] or no error will be returned.
 func (controller *Controller) AssertAuthenticated() error {
 	if controller.cookie == nil || controller.csrfToken == "" {
 		return UnauthenticatedError

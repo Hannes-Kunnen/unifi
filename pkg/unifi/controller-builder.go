@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-// A ControllerBuilder helps to build a Controller.
+// A ControllerBuilder helps to build a [Controller].
 type ControllerBuilder struct {
 	baseUrl             string
 	controllerType      string
@@ -42,7 +42,7 @@ func (builder *ControllerBuilder) SetTlsVerification(verificationOn bool) *Contr
 	return builder
 }
 
-// Build builds the Controller and returns a reference to it.
+// Build builds the [Controller] and returns a reference to it.
 // It will return an error if any of the currently set parameters are invalid.
 func (builder *ControllerBuilder) Build() (*Controller, error) {
 	_, err := url.ParseRequestURI(builder.baseUrl)
