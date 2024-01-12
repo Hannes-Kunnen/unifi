@@ -30,6 +30,7 @@ type Controller struct {
 }
 
 // SetBaseUrl updates the URL at which the UniFi controller is reachable.
+// It will return an error if the URL can not be parsed and is therefor invalid.
 func (controller *Controller) SetBaseUrl(baseUrl string) error {
 	_, err := url.ParseRequestURI(baseUrl)
 	if err != nil {
@@ -51,6 +52,7 @@ func (controller *Controller) SetControllerType(controllerType string) {
 }
 
 // SetRequestTimout updates the timeout to use when making http requests.
+// It returns an error if the timeout is smaller than 0.
 func (controller *Controller) SetRequestTimout(timeout time.Duration) error {
 	// Verify request timeout is valid (negative timout is not documented).
 	if timeout < 0 {
@@ -82,9 +84,10 @@ func (controller *Controller) CreateSite(name string) Site {
 	}
 }
 
-// Executes a request with given method to the given endpoint URL, if a body is included it will be
+// Executes a request with given method to the given endpointUrl, if a body is included it will be
 // transformed to JSON and added as a request body. If responseData is set the response body will
 // be parsed and the value will be stored in this variable.
+// It will return an error if the request fails for any reason.
 func (controller *Controller) execute(
 	method string,
 	endpointUrl string,

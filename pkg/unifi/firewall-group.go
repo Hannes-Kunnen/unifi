@@ -39,11 +39,9 @@ type FirewallGroup struct {
 	GroupType string `json:"group_type,omitempty"`
 }
 
-// CreateFirewallGroup creates a new firewall group linked to this Site.
-func (site *Site) CreateFirewallGroup(
-	// The data of the new group.
-	firewallGroup FirewallGroup,
-) (FirewallGroupResponse, error) {
+// CreateFirewallGroup creates a new firewall group linked to this Site using the given
+// firewall group data. It will return an error if the creation of the firewall group failed.
+func (site *Site) CreateFirewallGroup(firewallGroup FirewallGroup) (FirewallGroupResponse, error) {
 	responseData := FirewallGroupResponse{}
 	endpointUrl := site.createEndpointUrl("rest/firewallgroup", "")
 
@@ -62,6 +60,7 @@ func (site *Site) CreateFirewallGroup(
 }
 
 // GetAllFirewallGroups returns all firewall groups linked to this Site.
+// It will return an error if it fails to fetch the firewall groups.
 func (site *Site) GetAllFirewallGroups() (FirewallGroupResponse, error) {
 	endpointUrl := site.createEndpointUrl("rest/firewallgroup", "")
 	responseData := FirewallGroupResponse{}
@@ -81,10 +80,10 @@ func (site *Site) GetAllFirewallGroups() (FirewallGroupResponse, error) {
 }
 
 // GetFirewallGroup returns the firewall group linked to the given ID and this Site.
-func (site *Site) GetFirewallGroup(
-	// The firewall group ID.
-	id string,
-) (FirewallGroupResponse, error) {
+// It will return an error if it fails to fetch the specific firewall group, however if no group
+// with the given ID is present or the ID is invalid no error but a response with an empty data
+// array will be returned.
+func (site *Site) GetFirewallGroup(id string) (FirewallGroupResponse, error) {
 	endpointUrl := site.createEndpointUrl("rest/firewallgroup", id)
 	responseData := FirewallGroupResponse{}
 
@@ -102,11 +101,10 @@ func (site *Site) GetFirewallGroup(
 	return responseData, nil
 }
 
-// UpdateFirewallGroup updates the firewall group linked to the given ID and this Site.
+// UpdateFirewallGroup updates the firewall group linked to the given ID and this Site using the
+// given firewall group data. It will return an error if the update of the firewall group failed.
 func (site *Site) UpdateFirewallGroup(
-	// The firewall group ID.
 	id string,
-	// The updated group data.
 	firewallGroup FirewallGroup,
 ) (FirewallGroupResponse, error) {
 	endpointUrl := site.createEndpointUrl("rest/firewallgroup", id)
@@ -127,10 +125,8 @@ func (site *Site) UpdateFirewallGroup(
 }
 
 // DeleteFirewallGroup deletes the firewall group linked to the given ID and this Site.
-func (site *Site) DeleteFirewallGroup(
-	// The firewall group ID.
-	id string,
-) (FirewallGroupResponse, error) {
+// It will return an error if the deletion of the firewall group failed.
+func (site *Site) DeleteFirewallGroup(id string) (FirewallGroupResponse, error) {
 	endpointUrl := site.createEndpointUrl("rest/firewallgroup", id)
 	responseData := FirewallGroupResponse{}
 

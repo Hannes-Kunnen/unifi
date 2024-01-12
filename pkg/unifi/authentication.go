@@ -22,13 +22,8 @@ type loginInfo struct {
 }
 
 // Login authenticates the user at the UniFi controller using the given username and password and
-// saves the received cookie and CSRF token.
-func (controller *Controller) Login(
-	// The UniFi username for the UniFi controller.
-	username string,
-	// The UniFi password for the UniFi controller.
-	password string,
-) error {
+// saves the received cookie and CSRF token. It returns an error if the login fails.
+func (controller *Controller) Login(username string, password string) error {
 	var endpointUrl string
 
 	switch controller.controllerType {
@@ -86,7 +81,7 @@ func (controller *Controller) Login(
 }
 
 // Logout invalidates the current session credentials (cookie and CSRF token) and clears the
-// user credentials.
+// user credentials. It returns an error if the logout fails.
 func (controller *Controller) Logout() error {
 	var endpointUrl string
 	switch controller.controllerType {
@@ -116,6 +111,8 @@ func (controller *Controller) Logout() error {
 
 // AuthorizeRequest adds the authorization cookie and CSRF token to the given http request.
 // If the current session has expired re-authentication is attempted.
+// It returns an UnauthenticatedError if the Controller has not received authentication, a login
+// error can also be returned if re-authentication was attempted and the login failed.
 func (controller *Controller) AuthorizeRequest(req *http.Request) error {
 	err := controller.AssertAuthenticated()
 

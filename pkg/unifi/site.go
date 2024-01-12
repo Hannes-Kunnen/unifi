@@ -13,7 +13,8 @@ type Site struct {
 	name string
 }
 
-// SetController updates the Controller controlling the Site.
+// SetController updates the Controller controlling the Site to the given controller.
+// It will return an error if the given controller is empty.
 func (site *Site) SetController(controller *Controller) error {
 	if controller == nil {
 		return errors.New("site controller is required")
@@ -22,7 +23,8 @@ func (site *Site) SetController(controller *Controller) error {
 	return nil
 }
 
-// SetName updates the name of the Site.
+// SetName updates the name of the Site to the given name.
+// It will return an error if the given name is empty
 func (site *Site) SetName(name string) error {
 	if name == "" {
 		return errors.New("site name can not be empty")

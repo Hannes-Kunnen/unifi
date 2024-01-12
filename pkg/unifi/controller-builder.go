@@ -43,6 +43,7 @@ func (builder *ControllerBuilder) SetTlsVerification(verificationOn bool) *Contr
 }
 
 // Build builds the Controller and returns a reference to it.
+// It will return an error if any of the currently set parameters are invalid.
 func (builder *ControllerBuilder) Build() (*Controller, error) {
 	_, err := url.ParseRequestURI(builder.baseUrl)
 	if err != nil {
