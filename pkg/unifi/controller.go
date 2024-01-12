@@ -90,9 +90,8 @@ func (controller *Controller) execute(
 	endpointUrl string,
 	body any,
 	responseData any,
-) (*http.Response, error) {
+) (res *http.Response, err error) {
 	var req *http.Request
-	var err error
 	if body == nil {
 		req, err = http.NewRequest(method, endpointUrl, http.NoBody)
 	} else {
@@ -116,15 +115,15 @@ func (controller *Controller) execute(
 		req.Header.Set("Content-Type", "application/json")
 	}
 
-	var res *http.Response
 	res, err = controller.httpClient.Do(req)
 	if err != nil {
 		return res, err
 	}
 	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
-			fmt.Println(err)
+		closeError := Body.Close()
+		// Only update the error if there was no error during the normal function flow
+		if err == nil {
+			err = closeError
 		}
 	}(res.Body)
 
