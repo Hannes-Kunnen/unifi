@@ -16,8 +16,8 @@ type FirewallGroupResponse struct {
 // [FirewallGroupResponse]. It contains either [FirewallGroup] or [DataValidationError] based on
 // whether the request succeeded.
 type FirewallGroupResponseData struct {
-	FirewallGroup
-	DataValidationError
+	*FirewallGroup
+	*DataValidationError
 }
 
 // FirewallGroup is the representation of a firewall group.

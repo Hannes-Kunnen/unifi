@@ -16,8 +16,8 @@ type FirewallRuleResponse struct {
 // [FirewallRuleResponse]. It contains either [FirewallRule] or [DataValidationError] based on
 // whether the request succeeded.
 type FirewallRuleResponseData struct {
-	FirewallRule
-	DataValidationError
+	*FirewallRule
+	*DataValidationError
 }
 
 // FirewallRule is the representation of a firewall rule.
