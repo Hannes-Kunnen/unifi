@@ -21,7 +21,10 @@ type FirewallGroupResponseData struct {
 
 // FirewallGroup is the representation of a firewall group.
 type FirewallGroup struct {
-	// The group data.
+	// The date of the group based on the GroupType:
+	//	- address-group: IPv4 addresses.
+	//	- ipv6-address-group: IPv6 addresses.
+	//	- port-group: port(s) and/or port range(s) e.g. "80", "443", "8000-9000".
 	GroupMembers []string `json:"group_members,omitempty"`
 	// The group name.
 	Name string `json:"name,omitempty"`
