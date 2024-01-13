@@ -12,17 +12,15 @@ type Meta struct {
 	Msg string `json:"msg,omitempty"`
 }
 
-// ValidationError indicates an error occurred when trying to validate a field.
-type ValidationError struct {
-	// The field on which the validation failed.
-	Field string `json:"field,omitempty"`
-	// The expected pattern the field should adhere to.
-	Pattern string `json:"pattern,omitempty"`
-}
-
 // DataValidationError is the representation of an error in the data array of a request response.
 type DataValidationError struct {
-	ValidationError ValidationError `json:"validationError,omitempty"`
+	// ValidationError indicates an error occurred when trying to validate a field.
+	ValidationError struct {
+		// The field on which the validation failed.
+		Field string `json:"field,omitempty"`
+		// The expected pattern the field should adhere to.
+		Pattern string `json:"pattern,omitempty"`
+	} `json:"validationError,omitempty"`
 	// The response code indicating the response status.
 	Rc string `json:"rc,omitempty"`
 	// An error message describing what went wrong.
