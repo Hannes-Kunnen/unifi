@@ -1,5 +1,7 @@
 # Unifi
 
+[![License](https://img.shields.io/github/license/Hannes-Kunnen/unifi)](./LICENSE)
+
 Unifi is a tool to manage one or more UniFi (multi-site) controller(s) using GO.
 
 ## Documentation
