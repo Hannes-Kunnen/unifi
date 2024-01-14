@@ -1,10 +1,13 @@
 # Unifi
 
 [![License](https://img.shields.io/github/license/Hannes-Kunnen/unifi)](./LICENSE)
+[![Go Reference](https://pkg.go.dev/badge/github.com/Hannes-Kunnen/unifi.svg)](https://pkg.go.dev/github.com/Hannes-Kunnen/unifi)
 
 Unifi is a tool to manage one or more UniFi (multi-site) controller(s) using GO.
 
 ## Documentation
+
+The full Go documentation for the unifi package can be found at <https://pkg.go.dev/github.com/Hannes-Kunnen/unifi/pkg/unifi>.
 
 ### Getting started
 
